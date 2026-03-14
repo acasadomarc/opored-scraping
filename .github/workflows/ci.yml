@@ -1,0 +1,61 @@
+name: Opored-scraping
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}
+
+      - name: Ejecutar tests
+        run: mvn test -Dspring.profiles.active=test
+
+      - name: Analizar con SonarQube
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=acasadomarc_opored-scraping -Pcoverage
+
+      - name: Build del proyecto
+        run: mvn package -DskipTests
+
+      - name: Login en GitHub Container Registry
+        env:
+          SECRET: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$SECRET" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build y push imagen Docker
+        run: |
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t $IMAGE_NAME:latest .
+          docker push $IMAGE_NAME:latest
