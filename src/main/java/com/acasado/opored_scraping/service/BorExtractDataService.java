@@ -61,7 +61,7 @@ public class BorExtractDataService implements ExtractDataService {
             }
             log.info("BOR data extracted and sent successfully");
         }
-        // Catch all possible exception types instead of the generic Exception to allow NoDataException to cross
+        // Catch all possible exception types instead of the generic Exception to allow NoDataException to cross by
         catch (SAXException | IOException | XPathExpressionException | ParserConfigurationException e) {
             log.error("Error parsing xml: {}", e.getMessage());
         }
