@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-		<sonar.organization>tonicm09</sonar.organization>
+		<sonar.organization>acasadomarc</sonar.organization>
 	</properties>
 	<dependencies>
 		<dependency>
