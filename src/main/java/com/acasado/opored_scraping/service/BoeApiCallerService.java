@@ -21,7 +21,7 @@ public class BoeApiCallerService {
     public BoeApiCallerService(WebClientService webClientService) {
         this.webClientService = webClientService;
     }
-    // Although the BOE is usually published at the beginning of the day, we set up two calls to ensure data reception in case it has been published later or there was a problem with the API.
+    // Although the BOE is usually published at the beginning of the day, we set up two calls to ensure data reception in case it has been published later or there was a problem with the API
     @Scheduled(fixedRate = 180000)
     @Scheduled(cron = "0 0 10,16 * * *")
     public Mono<Object> extractBoeData() {
