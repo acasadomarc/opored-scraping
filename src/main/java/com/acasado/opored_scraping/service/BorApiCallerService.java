@@ -19,7 +19,6 @@ public class BorApiCallerService {
         this.webClientService = webClientService;
     }
     // Although the BOR is usually published at the beginning of the day, we set up two calls to ensure data reception in case it has been published later or there was a problem with the API.
-    @Scheduled(fixedRate = 150000)
     @Scheduled(cron = "0 0 11,17 * * *")
     public Mono<Object> extractBorData() {
         log.info("Automated BOR call for date: {}", LocalDate.now());
