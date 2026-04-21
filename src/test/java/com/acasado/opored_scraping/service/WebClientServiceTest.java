@@ -83,7 +83,7 @@ class WebClientServiceTest {
 
     @Test
     void shouldRetryAndEventuallyReturnEmpty_whenServerReturns5xx() {
-        // Arrange: Encolamos 3 errores para agotar los reintentos (o 4 para estar seguros)
+        // Arrange: Use all the retry attempts
         mockWebServer.enqueue(new MockResponse().setResponseCode(500));
         mockWebServer.enqueue(new MockResponse().setResponseCode(500));
         mockWebServer.enqueue(new MockResponse().setResponseCode(500));
@@ -101,7 +101,6 @@ class WebClientServiceTest {
         // Assert
         assertNull(result);
         verify(extractor, never()).extractData(anyString());
-        // Opcional: verificar que se hicieron los reintentos en el mockWebServer
         assertTrue(mockWebServer.getRequestCount() > 1);
     }
 }
