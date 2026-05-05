@@ -23,7 +23,9 @@ public class BocylExtractDataService implements ExtractDataService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode jsonNodes = mapper.readTree(jsonContent);
+            log.info(jsonNodes.toString());
             JsonNode results = jsonNodes.get("results");
+            log.info(results.asText());
 
             if (results.isEmpty()) {
                 throw new NoDataException("No results found");
