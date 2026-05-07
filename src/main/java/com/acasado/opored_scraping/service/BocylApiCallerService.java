@@ -24,21 +24,23 @@ public class BocylApiCallerService {
     // Although the BOCYL is usually published at the beginning of the day, we set up two calls to ensure data reception in case it has been published later or there was a problem with the API.
     @Scheduled(cron = "0 0 12,18 * * *")
     public Mono<Object> extractBocylData() {
-        log.info("Automated BOCYL call for date: {}", LocalDate.now());
-        final String BOCYL_BASE_URL = "https://jcyl.opendatasoft.com/api/explore/v2.1/catalog/datasets/bocyl/records";
-        URI completedUri;
-        // We use yesterday because BOCYL publishes data with one day of delay
-        String yesterday = "%27"+ LocalDate.now().minusDays(1).format(formatter) + "%27";
+        // Added mono defer to reevaluate the code in each execution and pick the right date and not the date when the service is first executed
+        return Mono.defer(() -> {
+            log.info("Automated BOCYL call for date: {}", LocalDate.now());
+            final String BOCYL_BASE_URL = "https://jcyl.opendatasoft.com/api/explore/v2.1/catalog/datasets/bocyl/records";
+            URI completedUri;
 
-        // Also, friday data is published on the next monday, not on saturday
-        if (LocalDate.now().getDayOfWeek() == DayOfWeek.MONDAY) {
-            String lastFriday = "%27"+ LocalDate.now().minusDays(3).format(formatter) + "%27";
-            completedUri = URI.create(BOCYL_BASE_URL + "?where=fecha_publicacion%3Ddate" + lastFriday);
-        }
-        else {
-            completedUri = URI.create(BOCYL_BASE_URL + "?where=fecha_publicacion%3Ddate" + yesterday);
-            log.info(completedUri.toString());
-        }
-        return webClientService.extractData(completedUri, "bocyl");
-        }
+            String yesterday = "%27"+ LocalDate.now().minusDays(1).format(formatter) + "%27";
+
+            if (LocalDate.now().getDayOfWeek() == DayOfWeek.MONDAY) {
+                String lastFriday = "%27"+ LocalDate.now().minusDays(3).format(formatter) + "%27";
+                completedUri = URI.create(BOCYL_BASE_URL + "?where=fecha_publicacion%3Ddate" + lastFriday);
+            }
+            else {
+                completedUri = URI.create(BOCYL_BASE_URL + "?where=fecha_publicacion%3Ddate" + yesterday);
+                log.info(completedUri.toString());
+            }
+            return webClientService.extractData(completedUri, "bocyl");
+        });
+    }
 }
