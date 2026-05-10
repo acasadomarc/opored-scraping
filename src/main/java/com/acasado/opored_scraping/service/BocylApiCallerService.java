@@ -38,7 +38,6 @@ public class BocylApiCallerService {
             }
             else {
                 completedUri = URI.create(BOCYL_BASE_URL + "?where=fecha_publicacion%3Ddate" + yesterday);
-                log.info(completedUri.toString());
             }
             return webClientService.extractData(completedUri, "bocyl");
         });
